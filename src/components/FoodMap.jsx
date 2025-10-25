@@ -1,108 +1,20 @@
-import { useState, useEffect, useRef } from 'react'
-import { MapPin, Filter, Search, Star, Utensils, ShoppingCart } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { MapPin, Navigation, Star, Clock, Phone, ExternalLink, Filter, Search, Heart, Zap } from 'lucide-react'
 
 const FoodMap = () => {
-  const [map, setMap] = useState(null)
-  const [markers, setMarkers] = useState([])
-  const [selectedFilter, setSelectedFilter] = useState('all')
-  const [searchQuery, setSearchQuery] = useState('')
   const [userLocation, setUserLocation] = useState(null)
-  const mapRef = useRef(null)
-
-  // Singapore food locations (placeholder data)
-  const foodLocations = [
-    {
-      id: 1,
-      name: 'Maxwell Food Centre',
-      type: 'hawker',
-      cuisine: 'mixed',
-      nutriGrade: 'A',
-      rating: 4.5,
-      lat: 1.2804,
-      lng: 103.8446,
-      description: 'Famous for Tian Tian Hainanese Chicken Rice',
-      halal: false,
-      vegetarian: false
-    },
-    {
-      id: 2,
-      name: 'Lau Pa Sat',
-      type: 'hawker',
-      cuisine: 'mixed',
-      nutriGrade: 'B',
-      rating: 4.2,
-      lat: 1.2806,
-      lng: 103.8503,
-      description: 'Historic food centre with diverse options',
-      halal: true,
-      vegetarian: true
-    },
-    {
-      id: 3,
-      name: 'Cold Storage - Marina Bay',
-      type: 'supermarket',
-      cuisine: 'international',
-      nutriGrade: 'A',
-      rating: 4.0,
-      lat: 1.2810,
-      lng: 103.8570,
-      description: 'Premium supermarket with healthy options',
-      halal: true,
-      vegetarian: true
-    },
-    {
-      id: 4,
-      name: 'Tekka Centre',
-      type: 'hawker',
-      cuisine: 'indian',
-      nutriGrade: 'B',
-      rating: 4.3,
-      lat: 1.3048,
-      lng: 103.8508,
-      description: 'Best Indian food in Little India',
-      halal: true,
-      vegetarian: true
-    },
-    {
-      id: 5,
-      name: 'Chinatown Food Street',
-      type: 'hawker',
-      cuisine: 'chinese',
-      nutriGrade: 'C',
-      rating: 4.1,
-      lat: 1.2833,
-      lng: 103.8442,
-      description: 'Traditional Chinese street food',
-      halal: false,
-      vegetarian: false
-    },
-    {
-      id: 6,
-      name: 'Geylang Serai Market',
-      type: 'hawker',
-      cuisine: 'malay',
-      nutriGrade: 'A',
-      rating: 4.4,
-      lat: 1.3178,
-      lng: 103.8950,
-      description: 'Authentic Malay cuisine',
-      halal: true,
-      vegetarian: false
-    }
-  ]
+  const [nearbyPlaces, setNearbyPlaces] = useState([])
+  const [selectedPlace, setSelectedPlace] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterType, setFilterType] = useState('all')
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    initMap()
-    getCurrentLocation()
+    getUserLocation()
+    loadNearbyPlaces()
   }, [])
 
-  const initMap = () => {
-    // Initialize Google Maps (placeholder for now)
-    // In a real implementation, you would use Google Maps API
-    console.log('Map initialization placeholder')
-  }
-
-  const getCurrentLocation = () => {
+  const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -113,280 +25,386 @@ const FoodMap = () => {
         },
         (error) => {
           console.error('Error getting location:', error)
-          // Default to Singapore
-          setUserLocation({ lat: 1.3521, lng: 103.8198 })
+          // Default to Singapore coordinates
+          setUserLocation({
+            lat: 1.3521,
+            lng: 103.8198
+          })
         }
       )
     } else {
-      // Default to Singapore
-      setUserLocation({ lat: 1.3521, lng: 103.8198 })
-    }
-  }
-
-  const getFilteredLocations = () => {
-    let filtered = foodLocations
-
-    if (selectedFilter !== 'all') {
-      filtered = filtered.filter(location => {
-        switch (selectedFilter) {
-          case 'hawker':
-            return location.type === 'hawker'
-          case 'supermarket':
-            return location.type === 'supermarket'
-          case 'halal':
-            return location.halal
-          case 'vegetarian':
-            return location.vegetarian
-          case 'grade-a':
-            return location.nutriGrade === 'A'
-          default:
-            return true
-        }
+      // Default to Singapore coordinates
+      setUserLocation({
+        lat: 1.3521,
+        lng: 103.8198
       })
     }
-
-    if (searchQuery) {
-      filtered = filtered.filter(location =>
-        location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        location.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-
-    return filtered
   }
 
-  const getNutriGradeColor = (grade) => {
+  const loadNearbyPlaces = () => {
+    setIsLoading(true)
+    
+    // Simulate API call with mock data
+    setTimeout(() => {
+      const mockPlaces = [
+        {
+          id: 1,
+          name: 'Maxwell Food Centre',
+          type: 'hawker',
+          rating: 4.2,
+          distance: 0.3,
+          address: '1 Kadayanallur St, Singapore 069184',
+          phone: '+65 6225 5632',
+          hours: '6:00 AM - 10:00 PM',
+          priceRange: '$',
+          healthyOptions: ['Chicken Rice', 'Fish Soup', 'Vegetable Curry'],
+          nutriGrade: 'A',
+          image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop',
+          coordinates: { lat: 1.2804, lng: 103.8440 }
+        },
+        {
+          id: 2,
+          name: 'Tiong Bahru Market',
+          type: 'hawker',
+          rating: 4.5,
+          distance: 0.8,
+          address: '30 Seng Poh Rd, Singapore 168898',
+          phone: '+65 6222 9600',
+          hours: '6:00 AM - 11:00 PM',
+          priceRange: '$',
+          healthyOptions: ['Yong Tau Foo', 'Fish Ball Noodles', 'Vegetarian Rice'],
+          nutriGrade: 'A',
+          image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+          coordinates: { lat: 1.2867, lng: 103.8326 }
+        },
+        {
+          id: 3,
+          name: 'Salad Stop',
+          type: 'restaurant',
+          rating: 4.0,
+          distance: 0.5,
+          address: '123 Orchard Rd, Singapore 238863',
+          phone: '+65 6733 1122',
+          hours: '8:00 AM - 9:00 PM',
+          priceRange: '$$',
+          healthyOptions: ['Custom Salads', 'Smoothie Bowls', 'Fresh Juices'],
+          nutriGrade: 'A',
+          image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
+          coordinates: { lat: 1.3048, lng: 103.8318 }
+        },
+        {
+          id: 4,
+          name: 'Subway',
+          type: 'fastfood',
+          rating: 3.8,
+          distance: 0.2,
+          address: '456 Marina Bay Sands, Singapore 018956',
+          phone: '+65 6688 8868',
+          hours: '7:00 AM - 11:00 PM',
+          priceRange: '$$',
+          healthyOptions: ['Veggie Delite', 'Turkey Breast', 'Chicken Teriyaki'],
+          nutriGrade: 'B',
+          image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop',
+          coordinates: { lat: 1.2833, lng: 103.8607 }
+        },
+        {
+          id: 5,
+          name: 'McDonald\'s',
+          type: 'fastfood',
+          rating: 3.5,
+          distance: 0.6,
+          address: '789 Bugis St, Singapore 188015',
+          phone: '+65 6336 2000',
+          hours: '24 Hours',
+          priceRange: '$',
+          healthyOptions: ['McWrap', 'Salad', 'Apple Slices'],
+          nutriGrade: 'C',
+          image: 'https://images.unsplash.com/photo-1571091655789-405eb7a3a3a8?w=400&h=300&fit=crop',
+          coordinates: { lat: 1.3003, lng: 103.8558 }
+        },
+        {
+          id: 6,
+          name: 'Cold Storage',
+          type: 'grocery',
+          rating: 4.1,
+          distance: 0.4,
+          address: '321 Orchard Rd, Singapore 238865',
+          phone: '+65 6737 9944',
+          hours: '8:00 AM - 10:00 PM',
+          priceRange: '$$',
+          healthyOptions: ['Organic Vegetables', 'Fresh Fruits', 'Whole Grains'],
+          nutriGrade: 'A',
+          image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop',
+          coordinates: { lat: 1.3048, lng: 103.8318 }
+        }
+      ]
+      
+      setNearbyPlaces(mockPlaces)
+      setIsLoading(false)
+    }, 1000)
+  }
+
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case 'hawker': return '🍜'
+      case 'restaurant': return '🍽️'
+      case 'fastfood': return '🍔'
+      case 'grocery': return '🛒'
+      default: return '📍'
+    }
+  }
+
+  const getTypeColor = (type) => {
+    switch (type) {
+      case 'hawker': return 'text-orange-600 bg-orange-100'
+      case 'restaurant': return 'text-blue-600 bg-blue-100'
+      case 'fastfood': return 'text-red-600 bg-red-100'
+      case 'grocery': return 'text-green-600 bg-green-100'
+      default: return 'text-gray-600 bg-gray-100'
+    }
+  }
+
+  const getGradeColor = (grade) => {
     switch (grade) {
-      case 'A': return '#2ECC71'
-      case 'B': return '#F39C12'
-      case 'C': return '#E74C3C'
-      case 'D': return '#8E44AD'
-      default: return '#95A5A6'
+      case 'A': return 'text-green-600 bg-green-100'
+      case 'B': return 'text-blue-600 bg-blue-100'
+      case 'C': return 'text-yellow-600 bg-yellow-100'
+      case 'D': return 'text-red-600 bg-red-100'
+      default: return 'text-gray-600 bg-gray-100'
     }
   }
 
-  const getCuisineIcon = (cuisine) => {
-    switch (cuisine) {
-      case 'chinese': return '🥢'
-      case 'indian': return '🍛'
-      case 'malay': return '🍜'
-      case 'mixed': return '🍽️'
-      case 'international': return '🌍'
-      default: return '🍴'
-    }
-  }
-
-  const filteredLocations = getFilteredLocations()
+  const filteredPlaces = nearbyPlaces.filter(place => {
+    const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         place.address.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesFilter = filterType === 'all' || place.type === filterType
+    return matchesSearch && matchesFilter
+  })
 
   return (
-    <div className="food-map">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2 font-heading">Food Map</h1>
+        <p className="text-base sm:text-lg text-gray-600">Discover healthy food options nearby</p>
+      </div>
+
+      {/* Search and Filters */}
       <div className="card">
-        <h2>Find Healthy Food Near You</h2>
-        
-        {/* Search Bar */}
-        <div style={{ position: 'relative', marginBottom: '1rem' }}>
-          <Search 
-            size={20} 
-            style={{ 
-              position: 'absolute', 
-              left: '1rem', 
-              top: '50%', 
-              transform: 'translateY(-50%)', 
-              color: '#666' 
-            }} 
-          />
-          <input
-            type="text"
-            className="input"
-            placeholder="Search for food places..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ paddingLeft: '3rem' }}
-          />
-        </div>
+        <div className="card-body">
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search places or cuisines..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="form-input pl-10"
+              />
+            </div>
 
-        {/* Filter Buttons */}
-        <div style={{ 
-          display: 'flex', 
-          gap: '0.5rem', 
-          marginBottom: '1rem', 
-          flexWrap: 'wrap',
-          overflowX: 'auto',
-          paddingBottom: '0.5rem'
-        }}>
-          {[
-            { key: 'all', label: 'All', icon: '🍽️' },
-            { key: 'hawker', label: 'Hawker', icon: '🏪' },
-            { key: 'supermarket', label: 'Supermarket', icon: '🛒' },
-            { key: 'halal', label: 'Halal', icon: '🕌' },
-            { key: 'vegetarian', label: 'Vegetarian', icon: '🥬' },
-            { key: 'grade-a', label: 'Grade A', icon: '⭐' }
-          ].map(filter => (
-            <button
-              key={filter.key}
-              className={`btn ${selectedFilter === filter.key ? '' : 'btn-secondary'}`}
-              onClick={() => setSelectedFilter(filter.key)}
-              style={{ 
-                padding: '0.5rem 1rem', 
-                fontSize: '0.9rem', 
-                minHeight: 'auto',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <span style={{ marginRight: '0.25rem' }}>{filter.icon}</span>
-              {filter.label}
-            </button>
-          ))}
+            {/* Filter Buttons */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button
+                onClick={() => setFilterType('all')}
+                className={`button ${filterType === 'all' ? 'button-primary' : 'button-secondary'} text-xs sm:text-sm`}
+              >
+                All Places
+              </button>
+              <button
+                onClick={() => setFilterType('hawker')}
+                className={`button ${filterType === 'hawker' ? 'button-primary' : 'button-secondary'} text-xs sm:text-sm`}
+              >
+                🍜 Hawker
+              </button>
+              <button
+                onClick={() => setFilterType('restaurant')}
+                className={`button ${filterType === 'restaurant' ? 'button-primary' : 'button-secondary'} text-xs sm:text-sm`}
+              >
+                🍽️ Restaurant
+              </button>
+              <button
+                onClick={() => setFilterType('grocery')}
+                className={`button ${filterType === 'grocery' ? 'button-primary' : 'button-secondary'} text-xs sm:text-sm`}
+              >
+                🛒 Grocery
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Map Placeholder */}
-        <div style={{
-          height: '300px',
-          background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '1rem',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ textAlign: 'center', color: '#666' }}>
-            <MapPin size={48} style={{ marginBottom: '1rem', color: '#4BF4B4' }} />
-            <h3>Interactive Map</h3>
-            <p style={{ fontSize: '0.9rem' }}>
-              Google Maps integration coming soon!<br />
-              Pinch to zoom, tap markers for details
-            </p>
+      {/* Map Placeholder */}
+      <div className="card">
+        <div className="card-body p-0">
+          <div className="relative h-64 bg-gradient-to-br from-green-100 to-green-200 rounded-t-xl overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <MapPin size={48} className="text-green-600 mx-auto mb-2" />
+                <p className="text-green-700 font-semibold">Interactive Map</p>
+                <p className="text-green-600 text-sm">Tap on markers to see details</p>
+              </div>
+            </div>
+            
+            {/* Mock Map Markers */}
+            <div className="absolute top-4 left-4 w-3 h-3 bg-primary-500 rounded-full animate-pulse"></div>
+            <div className="absolute top-8 right-8 w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+            <div className="absolute bottom-8 left-8 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="absolute bottom-4 right-4 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
           </div>
           
-          {/* Placeholder markers */}
-          <div style={{
-            position: 'absolute',
-            top: '20%',
-            left: '30%',
-            width: '12px',
-            height: '12px',
-            background: '#2ECC71',
-            borderRadius: '50%',
-            border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: '60%',
-            right: '25%',
-            width: '12px',
-            height: '12px',
-            background: '#F39C12',
-            borderRadius: '50%',
-            border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: '30%',
-            left: '60%',
-            width: '12px',
-            height: '12px',
-            background: '#E74C3C',
-            borderRadius: '50%',
-            border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-          }} />
-        </div>
-
-        {/* Location List */}
-        <div>
-          <h3>Nearby Places ({filteredLocations.length})</h3>
-          {filteredLocations.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-              <Search size={48} style={{ color: '#ccc', marginBottom: '1rem' }} />
-              <p>No places found matching your criteria</p>
+          <div className="p-4 bg-gray-50 rounded-b-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Navigation size={16} className="text-gray-500" />
+                <span className="text-sm text-gray-600">Your Location</span>
+              </div>
+              <button className="button button-outline text-sm">
+                <ExternalLink size={14} />
+                Open in Maps
+              </button>
             </div>
-          ) : (
-            filteredLocations.map(location => (
-              <div key={location.id} className="card" style={{ marginBottom: '0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ margin: 0, marginBottom: '0.25rem' }}>
-                      {getCuisineIcon(location.cuisine)} {location.name}
-                    </h4>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>
-                      {location.description}
-                    </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Places Grid - Single Column Layout */}
+      <div className="space-y-4">
+        {isLoading ? (
+          <div className="card">
+            <div className="card-body text-center py-12">
+              <div className="flex justify-center items-center gap-2 mb-4">
+                <div className="w-3 h-3 bg-primary-500 rounded-full animate-bounce"></div>
+                <div className="w-3 h-3 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-3 h-3 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+              <p className="text-gray-600">Finding nearby places...</p>
+            </div>
+          </div>
+        ) : filteredPlaces.length === 0 ? (
+          <div className="card">
+            <div className="card-body text-center py-12">
+              <MapPin size={48} className="mx-auto mb-4 text-gray-400" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                No places found
+              </h3>
+              <p className="text-gray-500">
+                Try adjusting your search or filter criteria.
+              </p>
+            </div>
+          </div>
+        ) : (
+          filteredPlaces.map((place) => (
+            <div key={place.id} className="group card hover:shadow-xl transition-all duration-300 overflow-hidden">
+              {/* Hero Image Section */}
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src={place.image}
+                  alt={place.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                
+                {/* Top Badges */}
+                <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+                  <div className="flex gap-2">
+                    <span className={`badge ${getTypeColor(place.type)} text-xs font-semibold backdrop-blur-sm bg-white/90`}>
+                      {getTypeIcon(place.type)} {place.type.charAt(0).toUpperCase() + place.type.slice(1)}
+                    </span>
+                    <span className={`badge ${getGradeColor(place.nutriGrade)} text-xs font-semibold backdrop-blur-sm bg-white/90`}>
+                      Grade {place.nutriGrade}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '12px',
-                      background: getNutriGradeColor(location.nutriGrade) + '20',
-                      color: getNutriGradeColor(location.nutriGrade),
-                      fontWeight: 'bold',
-                      fontSize: '0.8rem'
-                    }}>
-                      Grade {location.nutriGrade}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <Star size={14} style={{ color: '#F39C12' }} />
-                      <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>
-                        {location.rating}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                    <Star size={12} className="text-yellow-500 fill-current" />
+                    <span className="text-xs font-semibold text-gray-700">{place.rating}</span>
                   </div>
                 </div>
-                
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <span style={{
-                    padding: '0.25rem 0.5rem',
-                    background: '#f8f9fa',
-                    borderRadius: '8px',
-                    fontSize: '0.8rem',
-                    color: '#666'
-                  }}>
-                    {location.type === 'hawker' ? '🏪' : '🛒'} {location.type}
-                  </span>
-                  {location.halal && (
-                    <span style={{
-                      padding: '0.25rem 0.5rem',
-                      background: '#e8f5e8',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      color: '#2ECC71'
-                    }}>
-                      🕌 Halal
-                    </span>
-                  )}
-                  {location.vegetarian && (
-                    <span style={{
-                      padding: '0.25rem 0.5rem',
-                      background: '#e8f5e8',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      color: '#2ECC71'
-                    }}>
-                      🥬 Vegetarian
-                    </span>
-                  )}
+
+                {/* Bottom Info */}
+                <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-gray-700">{place.distance}km away</span>
+                  </div>
+                  <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                    <span className="text-xs font-semibold text-gray-700">{place.priceRange}</span>
+                  </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+
+              {/* Content Section */}
+              <div className="p-6">
+                {/* Restaurant Name and Location */}
+                <div className="mb-4">
+                  <h3 className="font-bold text-lg text-gray-800 font-heading mb-1 line-clamp-1">
+                    {place.name}
+                  </h3>
+                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <MapPin size={14} className="text-gray-400 flex-shrink-0" />
+                    <span className="line-clamp-1">{place.address}</span>
+                  </div>
+                </div>
+
+                {/* Healthy Options */}
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Heart size={14} className="text-green-500" />
+                    <span className="text-sm font-semibold text-gray-700">Healthy Options</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {place.healthyOptions.slice(0, 3).map((option, index) => (
+                      <span key={index} className="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full border border-green-200 font-medium">
+                        {option}
+                      </span>
+                    ))}
+                    {place.healthyOptions.length > 3 && (
+                      <span className="text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                        +{place.healthyOptions.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div className="grid grid-cols-2 gap-3 mb-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <Clock size={12} className="flex-shrink-0" />
+                    <span className="truncate">{place.hours}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone size={12} className="flex-shrink-0" />
+                    <span className="truncate">{place.phone}</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <button className="flex-1 button button-outline text-sm font-semibold py-2.5 hover:bg-gray-50">
+                    <Navigation size={14} className="mr-2" />
+                    Directions
+                  </button>
+                  <button className="flex-1 button button-primary text-sm font-semibold py-2.5">
+                    <Zap size={14} className="mr-2" />
+                    Scan Menu
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
-      {/* Future Features TODO */}
-      <div className="card" style={{ background: '#f8f9fa', border: '2px dashed #ddd' }}>
-        <h3>🚀 Coming Soon</h3>
-        <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', color: '#666' }}>
-          <li>Real-time Google Maps integration</li>
-          <li>Directions to food places</li>
-          <li>Live reviews and ratings</li>
-          <li>Food recommendations based on your logs</li>
-          <li>Barcode scanning for packaged foods</li>
-          <li>Integration with Singapore's Healthy 365 app</li>
-        </ul>
-      </div>
+      {/* Load More */}
+      {filteredPlaces.length > 0 && (
+        <div className="text-center">
+          <button className="button button-outline">
+            Load More Places
+          </button>
+        </div>
+      )}
     </div>
   )
 }
